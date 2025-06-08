@@ -9,6 +9,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     pass
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    telegram_id: Optional[str] = None
+
 class User(UserBase):
     id: int
     created_at: datetime  # ✅ Исправлено: убрали Optional

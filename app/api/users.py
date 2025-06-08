@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from ..database import get_session
 from ..models.models import User
-from ..schemas.user import UserCreate, User as UserSchema
+from ..schemas.user import UserCreate, User as UserSchema, UserUpdate
 
 router = APIRouter()
 
@@ -50,3 +50,26 @@ async def get_user(
             detail="Пользователь не найден"
         )
     return user
+
+@router.patch("/{user_id}", response_model=UserSchema)
+async def update_user(
+    user_id: int,
+    user_update: UserUpdate,
+    session: AsyncSession = Depends(get_session)
+):
+    """Обновление пользователя по ID"""
+    db_user = await session.get(User, user_id)
+    if not db_user:
+        raise HTTPException(
+            status_code=404,
+            detail="Пользователь не найден"
+        )
+    
+    # Обновляем только те поля, которые переданы
+    update_data = user_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+    
+    await session.commit()
+    await session.refresh(db_user)
+    return db_user

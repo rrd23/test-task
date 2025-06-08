@@ -17,7 +17,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     description="Service for sending email and Telegram notifications",
     version=settings.APP_VERSION,
-    debug=settings.DEBUG,
+    debug_mode=settings.DEBUG,
     lifespan=lifespan
 )
 
