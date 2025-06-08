@@ -130,6 +130,31 @@ GET /users/{user_id}
 }
 ```
 
+#### Обновление пользователя
+```http
+PATCH /users/{user_id}
+Content-Type: application/json
+
+{
+    "telegram_id": "123456789"  // опционально
+}
+```
+
+**Ответ:**
+```json
+{
+    "id": 1,
+    "email": "user@example.com",
+    "telegram_id": "123456789",
+    "created_at": "2024-01-20T12:00:00"
+}
+```
+
+**Описание:**
+- Обновляет данные пользователя
+- Поддерживает частичное обновление (можно обновить только telegram_id)
+- Возвращает обновленные данные пользователя
+
 ### Кампании (Campaigns)
 
 #### Создание новой рассылки
@@ -230,6 +255,15 @@ curl -X POST "http://localhost:8000/users/" \
          }'
 ```
 
+#### Обновление пользователя
+```bash
+curl -X PATCH "http://localhost:8000/users/1" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "telegram_id": "123456789"
+         }'
+```
+
 #### Создание кампании
 ```bash
 curl -X POST "http://localhost:8000/campaigns/" \
@@ -263,6 +297,16 @@ def create_user(email: str, telegram_id: str = None):
     )
     return response.json()
 
+# Обновление пользователя
+def update_user(user_id: int, telegram_id: str = None):
+    response = requests.patch(
+        f"{BASE_URL}/users/{user_id}",
+        json={
+            "telegram_id": telegram_id
+        }
+    )
+    return response.json()
+
 # Создание кампании
 def create_campaign(text: str, user_ids: list):
     response = requests.post(
@@ -284,6 +328,10 @@ if __name__ == "__main__":
     # Создаем пользователя
     user = create_user("user@example.com", "123456789")
     print(f"Создан пользователь: {user}")
+
+    # Обновляем telegram_id пользователя
+    updated_user = update_user(user["id"], "987654321")
+    print(f"Обновлен пользователь: {updated_user}")
 
     # Создаем кампанию
     campaign = create_campaign("Тестовое сообщение", [user["id"]])
@@ -355,14 +403,21 @@ curl -X POST "http://localhost:8000/users/" \
      -d '{"email": "user@example.com", "telegram_id": "123456789"}'
 ```
 
-2. Создание кампании:
+2. Обновление пользователя:
+```bash
+curl -X PATCH "http://localhost:8000/users/1" \
+     -H "Content-Type: application/json" \
+     -d '{"telegram_id": "987654321"}'
+```
+
+3. Создание кампании:
 ```bash
 curl -X POST "http://localhost:8000/campaigns/" \
      -H "Content-Type: application/json" \
      -d '{"text": "Привет, мир!", "user_ids": [1]}'
 ```
 
-3. Проверка статуса кампании:
+4. Проверка статуса кампании:
 ```bash
 curl "http://localhost:8000/campaigns/1/status"
 ``` 
